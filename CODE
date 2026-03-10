@@ -1,0 +1,178 @@
+install.packages("caret")
+install.packages("randomForest")
+library(dplyr)
+library(ggplot2)
+library(caret)
+library(randomForest)
+library(shiny)
+library(DT)
+set.seed(123)
+
+n <- 500
+
+health_data <- data.frame(
+  
+  PATIENT_ID = paste0("P",1:n),
+  
+  AGE = sample(20:80,n,replace=TRUE),
+  
+  GENDER = sample(c("Male","Female"),n,replace=TRUE),
+  
+  HEART_RATE = round(rnorm(n,75,10)),
+  
+  BP_SYS = round(rnorm(n,120,15)),
+  
+  BP_DIA = round(rnorm(n,80,10)),
+  
+  TEMPERATURE = round(rnorm(n,98.6,0.7),1),
+  
+  OXYGEN = round(rnorm(n,96,2)),
+  
+  STRESS_LEVEL = sample(1:10,n,replace=TRUE)
+)
+
+health_data$RISK_LEVEL <- ifelse(
+  health_data$HEART_RATE > 90 |
+    health_data$BP_SYS > 140 |
+    health_data$OXYGEN < 94,
+  "High",
+  "Low"
+)
+
+health_data$RISK_LEVEL <- as.factor(health_data$RISK_LEVEL)
+
+write.csv(health_data,"health_dataset.csv",row.names=FALSE)
+
+head(health_data)
+ggplot(health_data,aes(x=AGE)) +
+  geom_histogram(bins=20) +
+  ggtitle("Age Distribution")
+ggplot(health_data,aes(x=HEART_RATE,y=BP_SYS)) +
+  geom_point() +
+  ggtitle("Heart Rate vs Blood Pressure")
+set.seed(123)
+
+train_index <- createDataPartition(health_data$RISK_LEVEL,
+                                   p = 0.8,
+                                   list = FALSE)
+
+train_data <- health_data[train_index, ]
+test_data <- health_data[-train_index, ]
+model <- randomForest(
+  
+  RISK_LEVEL ~ AGE + HEART_RATE + BP_SYS +
+    BP_DIA + TEMPERATURE + OXYGEN + STRESS_LEVEL,
+  
+  data = train_data,
+  ntree = 100
+)
+
+print(model)
+pred <- predict(model,test_data)
+
+table(pred,test_data$RISK_LEVEL)
+confusionMatrix(pred,test_data$RISK_LEVEL)
+varImpPlot(model)
+importance <- importance(model)
+
+importance_df <- data.frame(
+  Feature = rownames(importance),
+  Importance = importance[,1]
+)
+
+ggplot(importance_df,
+       aes(x=reorder(Feature,Importance),
+           y=Importance)) +
+  geom_bar(stat="identity") +
+  coord_flip() +
+  ggtitle("Feature Importance for Risk Prediction")
+ui <- fluidPage(
+  
+  titlePanel("Smart Health Monitoring Dashboard"),
+  
+  sidebarLayout(
+    
+    sidebarPanel(
+      
+      selectInput("risk",
+                  "Select Risk Level",
+                  choices=c("High","Low")),
+      
+      numericInput("heart",
+                   "Heart Rate",
+                   75),
+      
+      numericInput("bp",
+                   "Systolic BP",
+                   120),
+      
+      numericInput("oxygen",
+                   "Oxygen Level",
+                   96),
+      
+      actionButton("predict",
+                   "Predict Risk")
+      
+    ),
+    
+    mainPanel(
+      
+      plotOutput("heart_plot"),
+      
+      DTOutput("table"),
+      
+      h3("Prediction Result"),
+      
+      textOutput("result")
+      
+    )
+  )
+)
+ui
+server <- function(input,output){
+  
+  filtered <- reactive({
+    
+    health_data %>%
+      filter(RISK_LEVEL == input$risk)
+    
+  })
+  
+  output$heart_plot <- renderPlot({
+    
+    ggplot(filtered(),
+           aes(x=HEART_RATE)) +
+      geom_histogram(bins=20) +
+      ggtitle("Heart Rate Distribution")
+    
+  })
+  
+  output$table <- renderDT({
+    
+    datatable(filtered())
+    
+  })
+  
+  observeEvent(input$predict,{
+    
+    new_patient <- data.frame(
+      AGE = 40,
+      HEART_RATE = input$heart,
+      BP_SYS = input$bp,
+      BP_DIA = 80,
+      TEMPERATURE = 98.6,
+      OXYGEN = input$oxygen,
+      STRESS_LEVEL = 5
+    )
+    
+    risk <- predict(model,new_patient)
+    
+    output$result <- renderText({
+      
+      paste("Predicted Risk Level:",risk)
+      
+    })
+    
+  })
+}
+shinyApp(ui,server)
