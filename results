@@ -1,0 +1,27 @@
+
+
+The Random Forest model achieved an accuracy of 100% on the test dataset. The confusion matrix showed that all high-risk and low-risk patients were correctly classified. The model demonstrated perfect sensitivity and specificity, indicating strong predictive performance. These results suggest that the selected health indicators are effective predictors of patient risk levels.
+## Machine Learning Model Results
+
+A Random Forest classification model was implemented to predict patient health risk levels using physiological indicators such as heart rate, blood pressure, oxygen saturation, temperature, and stress level.
+
+The dataset was divided into training and testing sets using an 80:20 split. The trained model was evaluated using a confusion matrix and performance metrics.
+
+The confusion matrix results are shown below:
+
+Prediction vs Actual Values:
+
+High Risk predicted correctly: 22
+Low Risk predicted correctly: 77
+
+No incorrect classifications were observed in the test dataset.
+
+Model Performance Metrics:
+
+Accuracy: 1.00 (100%)
+Sensitivity: 1.00
+Specificity: 1.00
+Balanced Accuracy: 1.00
+Kappa Statistic: 1.00
+
+The model achieved perfect classification on the test dataset, indicating that the selected health parameters strongly influence the predicted risk level. Feature importance analysis further confirmed that variables such as heart rate, systolic blood pressure, and oxygen levels were key predictors of patient health risk.
