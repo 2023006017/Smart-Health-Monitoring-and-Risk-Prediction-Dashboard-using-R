@@ -1,0 +1,54 @@
+The system architecture begins with synthetic dataset generation using R, simulating patient health indicators such as heart rate, blood pressure, temperature, oxygen level, and stress level. The dataset is then processed and cleaned before performing Exploratory Data Analysis (EDA) to understand patterns in health parameters.
+
+A Random Forest machine learning model is trained to classify patients into different health risk levels. The trained model is evaluated using accuracy and confusion matrix metrics. Feature importance analysis identifies the most influential health indicators affecting risk prediction.
+
+Finally, the results are integrated into a Shiny interactive dashboard, allowing users to visualize health data and predict risk levels for new patient inputs.
+          +----------------------+
+          |   Data Simulation    |
+          | (R Script Dataset)   |
+          +----------+-----------+
+                     |
+                     v
+          +----------------------+
+          |   Data Preprocessing |
+          | Cleaning & Structuring|
+          +----------+-----------+
+                     |
+                     v
+          +----------------------+
+          | Exploratory Data     |
+          | Analysis (EDA)       |
+          | Visualization        |
+          +----------+-----------+
+                     |
+                     v
+          +----------------------+
+          | Machine Learning     |
+          | Random Forest Model  |
+          +----------+-----------+
+                     |
+                     v
+          +----------------------+
+          | Model Evaluation     |
+          | Accuracy / Confusion |
+          | Matrix               |
+          +----------+-----------+
+                     |
+                     v
+          +----------------------+
+          | Feature Importance   |
+          | Health Risk Factors  |
+          +----------+-----------+
+                     |
+                     v
+          +----------------------+
+          | Shiny Dashboard      |
+          | Visualization &      |
+          | Risk Prediction Tool |
+          +----------+-----------+
+                     |
+                     v
+          +----------------------+
+          |  User Interaction    |
+          | Predict Patient Risk |
+          +----------------------+
